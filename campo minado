@@ -1,0 +1,507 @@
+#include <stdio.h> 
+#include <stdlib.h>
+/*#include <conio.h> */
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
+#include <stdbool.h>
+
+   
+   
+int numeroBomba = 35; 
+
+
+typedef struct {
+    bool ehBomba;
+    bool estaAberta;
+    int adjacentes;
+}Casa;
+
+int GeraDificuldade()
+{
+    int numeroRandom = 30;
+
+
+    return numeroRandom;
+}
+
+
+
+void LimpaTela()
+{
+    system("cls");
+}
+
+void MostraMenu()
+{
+printf("\t     ________   _______   _______   _______   _______ \n ");  
+printf("\t    |  ____  | |  ___  | |       | |  ____ | |  ___  |\n");
+printf("\t    | |    |_| | |   | | | || || | | |    || | |   | |\n");
+printf("\t    | |        | |___| | | || || | | |____|| | |   | |\n");
+printf("\t    | |        | |   | | | |   | | | |       | |   | |\n");
+printf("\t    | |____/|  | |   | | | |   | | | |       | |___| |                    ||/        \n");
+printf("\t    |_______/  |/     || |/     || |/        |_______|                .---*--      \n");
+printf("\t _______ __________ __      _  _______   ______    _______          /    /|     \n");
+printf("\t|       | |__   __/ | |    || |  ___  | |  __  |  |  ___  |        _L_   \n");
+printf("\t| || || |    | |    |  |  | | | |   | | | |  |  | | |   | |      |     |    \n");
+printf("\t| || || |    | |    |   | | | | |___| | | |   | | | |   | |  (| |  O O  | |)      \n");
+printf("\t| ||_|| |    | |    | || V  | |  ___  | | |   | | | |   | |    |    _    |      \n");
+printf("\t| |   | |    | |    | | |   | | |   | | | |   | | | |   | |     |  (_)  /  \n");
+printf("\t| |   | |_ __) (___ | |  |  | | |   | | | (__/  | | |___| |     _|.___.|_   \n");
+printf("\t|/     || |_______/ |/    |_| |/     || |______/  |_______|   (_| booom |_)     \n\n\n\n");
+printf("                Caio Eduardo Braga Fernandes - 118088128\n                Alex Ventapane Barros Soares - 117084171\n                Livia Machado Campos  	    - 118146366\n\n\n");
+printf("                          Bem-Vindo ao Campo Minado\n");
+printf("                         Pressione Enter para Comecar\n");
+    getchar();
+    
+}
+
+
+
+void PreencheCampoComBombas(Casa campo[15][15])
+{
+    srand(time(NULL));
+    int contadorLinha, contadorColuna, contadorBomba;
+    int maiorChance = 100, menorChance = 1;
+
+    for (contadorBomba = 0; contadorBomba < numeroBomba;)
+    {
+        for (contadorLinha = 0; contadorLinha < 15; ++contadorLinha)
+        {
+            for (contadorColuna = 0; contadorColuna < 15; ++contadorColuna)
+            {
+                int chanceDeSerBomba = (rand() % (maiorChance - menorChance + 1)) + menorChance;
+
+                if (campo[contadorLinha][contadorColuna].ehBomba)
+                    continue;
+
+                if (contadorBomba == numeroBomba)
+                    break;
+
+                if (chanceDeSerBomba == 1)
+                {
+                    campo[contadorLinha][contadorColuna].ehBomba = true;
+                    ++contadorBomba;
+                }
+            }
+        }
+    }
+}
+
+void CalculaAdjacente(Casa campo[15][15])
+{
+    int contadorLinha, contadorColuna;
+
+    for (contadorLinha = 0; contadorLinha < 15; ++contadorLinha)
+    {
+        for (contadorColuna = 0; contadorColuna < 15; ++contadorColuna)
+        {
+            if (contadorLinha - 1 >= 0 && contadorColuna - 1 >= 0)
+            {
+                if (campo[contadorLinha - 1][contadorColuna - 1].ehBomba)
+                    campo[contadorLinha][contadorColuna].adjacentes++;
+            }
+
+            if (contadorLinha - 1 >= 0)
+            {
+                if (campo[contadorLinha - 1][contadorColuna].ehBomba)
+                    campo[contadorLinha][contadorColuna].adjacentes++;
+            }
+
+            if (contadorLinha - 1 >= 0 && contadorColuna + 1 < 15)
+            {
+                if (campo[contadorLinha - 1][contadorColuna + 1].ehBomba)
+                    campo[contadorLinha][contadorColuna].adjacentes++;
+            }
+
+            if (contadorColuna - 1 >= 0)
+            {
+                if (campo[contadorLinha][contadorColuna - 1].ehBomba)
+                    campo[contadorLinha][contadorColuna].adjacentes++;
+            }
+            if (contadorColuna + 1 < 15)
+            {
+                if (campo[contadorLinha][contadorColuna + 1].ehBomba)
+                    campo[contadorLinha][contadorColuna].adjacentes++;
+            }
+
+            if (contadorLinha + 1 < 15 && contadorColuna - 1 >= 0)
+            {
+                if (campo[contadorLinha + 1][contadorColuna - 1].ehBomba)
+                    campo[contadorLinha][contadorColuna].adjacentes++;
+            }
+
+            if (contadorLinha + 1 < 15)
+            {
+                if (campo[contadorLinha + 1][contadorColuna].ehBomba)
+                    campo[contadorLinha][contadorColuna].adjacentes++;
+            }
+
+            if (contadorLinha + 1 < 15 && contadorColuna + 1 < 15)
+            {
+                if (campo[contadorLinha + 1][contadorColuna + 1].ehBomba)
+                    campo[contadorLinha][contadorColuna].adjacentes++;
+            }
+        }
+    }
+}
+
+void ConstroiCampo(Casa casa[15][15])
+{
+    int contadorLinha, contadorColuna;
+
+    for (contadorLinha = 0; contadorLinha < 15; ++contadorLinha)
+    {
+        for (contadorColuna = 0; contadorColuna < 15; ++contadorColuna)
+        {
+            casa[contadorLinha][contadorColuna].ehBomba = false;
+            casa[contadorLinha][contadorColuna].estaAberta = false;
+            casa[contadorLinha][contadorColuna].adjacentes = 0;
+        }
+    }
+
+    PreencheCampoComBombas(casa);
+    CalculaAdjacente(casa);
+}
+
+void MostraCampo(Casa casa[15][15])
+{
+    int contadorLinha, contadorColuna;
+
+    char letra = 'A';
+
+    printf("     1   2   3   4   5   6   7   8   9   10  11  12  13  14  15 \n");
+    printf("________________________________________________________________");
+
+    for (contadorLinha = 0; contadorLinha < 15; ++contadorLinha)
+    {
+        printf("\n");
+        for (contadorColuna = 0; contadorColuna < 15; ++contadorColuna)
+        {
+            if (!contadorColuna)
+            {
+                printf(" %c |", letra++);
+            }
+
+            if (casa[contadorLinha][contadorColuna].estaAberta)
+            {
+                if (casa[contadorLinha][contadorColuna].ehBomba)
+                    printf(" * |");
+                else if (casa[contadorLinha][contadorColuna].adjacentes)
+                    printf(" %d |", casa[contadorLinha][contadorColuna].adjacentes);
+                else
+                    printf(" %c |", 255);
+            }
+            else
+                printf(" - |");
+        }
+    }
+
+    printf("\n");
+
+}
+
+int Letrada(char letra)
+{
+    letra = toupper(letra);
+
+    switch (letra)
+    {
+    case 'A':
+        return 0;
+
+    case 'B':
+        return 1;
+
+    case 'C':
+        return 2;
+
+    case 'D':
+        return 3;
+
+    case 'E':
+        return 4;
+
+    case 'F':
+        return 5;
+
+    case 'G':
+        return 6;
+
+    case 'H':
+        return 7;
+
+    case 'I':
+        return 8;
+
+    case 'J':
+        return 9;
+
+    case 'K':
+        return 10;
+
+    case 'L':
+        return 11;
+
+    case 'M':
+        return 12;
+
+    case 'N':
+        return 13;
+
+    case 'O':
+        return 14;
+   
+    }
+    return 15;
+}
+
+
+void AbridorAdjacente(Casa campo[15][15], int posicaoX, int posicaoY)
+{
+    if (posicaoY + 1 < 15)
+    {
+        if (campo[posicaoX][posicaoY + 1].adjacentes == 0 && !campo[posicaoX][posicaoY + 1].estaAberta && !campo[posicaoX][posicaoY + 1].ehBomba)
+        {
+            campo[posicaoX][posicaoY + 1].estaAberta = true;
+            AbridorAdjacente(campo, posicaoX, posicaoY + 1);
+        }
+        else if (campo[posicaoX][posicaoY + 1].adjacentes > 0 && !campo[posicaoX][posicaoY + 1].estaAberta && !campo[posicaoX][posicaoY + 1].ehBomba)
+        {
+            campo[posicaoX][posicaoY + 1].estaAberta = true;
+        }
+    }
+
+    if (posicaoX - 1 >= 0 && posicaoY - 1 >= 0)
+    {
+        if (campo[posicaoX - 1][posicaoY - 1].adjacentes == 0 && !campo[posicaoX - 1][posicaoY - 1].estaAberta && !campo[posicaoX - 1][posicaoY - 1].ehBomba)
+        {
+            campo[posicaoX - 1][posicaoY - 1].estaAberta = true;
+            AbridorAdjacente(campo, posicaoX - 1, posicaoY - 1);
+        }
+        else if (campo[posicaoX - 1][posicaoY - 1].adjacentes > 0 && campo[posicaoX - 1][posicaoY - 1].estaAberta == 0 && !campo[posicaoX - 1][posicaoY - 1].ehBomba)
+        {
+            campo[posicaoX - 1][posicaoY - 1].estaAberta = true;
+        }
+    }
+
+    if (posicaoX - 1 >= 0)
+    {
+        if (campo[posicaoX - 1][posicaoY].adjacentes == 0 && !campo[posicaoX - 1][posicaoY].estaAberta && !campo[posicaoX - 1][posicaoY - 1].ehBomba)
+        {
+            campo[posicaoX - 1][posicaoY].estaAberta = true;
+            AbridorAdjacente(campo, posicaoX - 1, posicaoY);
+        }
+        else if (campo[posicaoX - 1][posicaoY].adjacentes > 0 && !campo[posicaoX - 1][posicaoY].estaAberta && !campo[posicaoX - 1][posicaoY].ehBomba)
+        {
+            campo[posicaoX - 1][posicaoY].estaAberta = true;
+        }
+    }
+
+    if (posicaoX - 1 >= 0 && posicaoY + 1 < 15)
+    {
+        if (campo[posicaoX - 1][posicaoY + 1].adjacentes == 0 && !campo[posicaoX - 1][posicaoY + 1].estaAberta && !campo[posicaoX - 1][posicaoY + 1].ehBomba)
+        {
+            campo[posicaoX - 1][posicaoY + 1].estaAberta = true;
+            AbridorAdjacente(campo, posicaoX - 1, posicaoY + 1);
+        }
+        else if (campo[posicaoX - 1][posicaoY + 1].adjacentes > 0 && !campo[posicaoX - 1][posicaoY + 1].estaAberta && !campo[posicaoX - 1][posicaoY + 1].ehBomba)
+        {
+            campo[posicaoX - 1][posicaoY + 1].estaAberta = true;
+        }
+    }
+
+    if (posicaoY - 1 >= 0)
+    {
+        if (campo[posicaoX][posicaoY - 1].adjacentes == 0 && !campo[posicaoX][posicaoY - 1].estaAberta && !campo[posicaoX][posicaoY - 1].ehBomba)
+        {
+            campo[posicaoX][posicaoY - 1].estaAberta = true;
+            AbridorAdjacente(campo, posicaoX, posicaoY - 1);
+        }
+        else if (campo[posicaoX][posicaoY - 1].adjacentes > 0 && !campo[posicaoX][posicaoY - 1].estaAberta && !campo[posicaoX][posicaoY - 1].ehBomba)
+        {
+            campo[posicaoX][posicaoY - 1].estaAberta = true;
+        }
+    }
+
+    if (posicaoX + 1 < 15 && posicaoY - 1 >= 0)
+    {
+        if (campo[posicaoX + 1][posicaoY - 1].adjacentes == 0 && !campo[posicaoX + 1][posicaoY - 1].estaAberta && !campo[posicaoX + 1][posicaoY - 1].ehBomba)
+        {
+            campo[posicaoX + 1][posicaoY - 1].estaAberta = true;
+            AbridorAdjacente(campo, posicaoX + 1, posicaoY - 1);
+        }
+        else if (campo[posicaoX + 1][posicaoY - 1].adjacentes > 0 && !campo[posicaoX + 1][posicaoY - 1].estaAberta && !campo[posicaoX + 1][posicaoY - 1].ehBomba)
+        {
+            campo[posicaoX + 1][posicaoY - 1].estaAberta = true;
+        }
+    }
+
+    if (posicaoX + 1 < 15)
+    {
+        if (campo[posicaoX + 1][posicaoY].adjacentes == 0 && !campo[posicaoX + 1][posicaoY].estaAberta && !campo[posicaoX + 1][posicaoY].ehBomba)
+        {
+            campo[posicaoX + 1][posicaoY].estaAberta = true;
+            AbridorAdjacente(campo, posicaoX + 1, posicaoY);
+        }
+        else if (campo[posicaoX + 1][posicaoY].adjacentes > 0 && !campo[posicaoX + 1][posicaoY].estaAberta && !campo[posicaoX + 1][posicaoY].ehBomba)
+        {
+            campo[posicaoX + 1][posicaoY].estaAberta = true;
+        }
+    }
+
+    if (posicaoX + 1 < 15 && posicaoY + 1 < 15)
+    {
+        if (campo[posicaoX + 1][posicaoY + 1].adjacentes == 0 && !campo[posicaoX + 1][posicaoY + 1].estaAberta && !campo[posicaoX + 1][posicaoY + 1].ehBomba)
+        {
+            campo[posicaoX + 1][posicaoY + 1].estaAberta = true;
+            AbridorAdjacente(campo, posicaoX + 1, posicaoY + 1);
+        }
+        else if (campo[posicaoX + 1][posicaoY + 1].adjacentes > 0 && !campo[posicaoX + 1][posicaoY + 1].estaAberta && !campo[posicaoX + 1][posicaoY + 1].ehBomba)
+        {
+            campo[posicaoX + 1][posicaoY + 1].estaAberta = true;
+        }
+    }
+}
+
+bool ChecaVitoria(Casa campo[15][15])
+{
+    int contaDorLinha, contaDorColuna, contadorAbertos = 0;
+
+    for (contaDorLinha = 0; contaDorLinha < 15; ++contaDorLinha)
+    {
+        for (contaDorColuna = 0; contaDorColuna < 15; ++contaDorColuna)
+        {
+            if (campo[contaDorLinha][contaDorColuna].estaAberta)
+                ++contadorAbertos;
+        }
+    }
+    if (contadorAbertos >= 15 * 15 - numeroBomba)
+        return true;
+    else
+        return false;
+}
+
+bool ChecaDerrota(Casa campo[15][15])
+{
+    int contaDorLinha, contaDorColuna = 0;
+
+    for (contaDorLinha = 0; contaDorLinha < 15; ++contaDorLinha)
+    {
+        for (contaDorColuna = 0; contaDorColuna < 15; ++contaDorColuna)
+        {
+            if (campo[contaDorLinha][contaDorColuna].estaAberta && campo[contaDorLinha][contaDorColuna].ehBomba)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+void AbreBombasCampo(Casa campo[15][15])
+{
+    int contaDorLinha, contaDorColuna = 0;
+
+    for (contaDorLinha = 0; contaDorLinha < 15; ++contaDorLinha)
+    {
+        for (contaDorColuna = 0; contaDorColuna < 15; ++contaDorColuna)
+        {
+            if (campo[contaDorLinha][contaDorColuna].ehBomba)
+                campo[contaDorLinha][contaDorColuna].estaAberta = true;
+        }
+    }
+}
+
+void Play(Casa campo[15][15])
+{
+    char letra;
+    int numeroX, numeroY;
+
+    LimpaTela();
+    MostraCampo(campo);
+    printf(" ______________________________________________________________\n");
+    printf("Digite as coordenadas da casa seguindo o formato LETRA NUMERO: \n");
+    scanf("\n%c %d", &letra, &numeroY);
+    numeroY--;
+    numeroX = Letrada(letra);
+
+    if (numeroX >= 0 && numeroX < 15 && numeroY >= 0 && numeroY < 15)
+    {
+        if (campo[numeroX][numeroY].ehBomba)
+        {
+            campo[numeroX][numeroY].estaAberta = true;
+        }
+        else
+        {
+            campo[numeroX][numeroY].estaAberta = true;
+
+            if (campo[numeroX][numeroY].adjacentes == 0)
+                AbridorAdjacente(campo, numeroX, numeroY);
+        }
+    }
+}
+
+int main()
+{
+    Casa campo[15][15];
+
+    MostraMenu();
+    ConstroiCampo(campo);
+
+    while (true)
+    {
+        Play(campo);
+
+        if (ChecaDerrota(campo))
+        {
+            LimpaTela();
+            AbreBombasCampo(campo);
+            MostraCampo(campo);
+
+            printf("VOCE EXPLODIU!!! \n");
+            printf("RECOLHA SEUS PEDACOS E TENTE NOVAMENTE.\n");
+            printf("          _.-^^---....,,--\n");
+            printf("       _--                  --_\n");
+            printf("      <                        >)\n");
+            printf("      |                         |\n");
+            printf("       |._                   _./\n");
+            printf("          ```--. . , ; .--'''\n");
+            printf("              | |   |\n");
+            printf("             .-=||  | |=-.\n");
+            printf("             `-=#$#&#$#=-'\n");
+            printf("               | ;  :|\n");
+            printf("      _____.,-##&$@##&#~,._____\n");
+
+
+            char letra = 0;
+
+            printf("\n\nDeseja continuar jogando? (Y/N)\n");
+            scanf("\n%c", &letra);
+
+            if (toupper(letra) == 'Y')
+                ConstroiCampo(campo);
+            else if (toupper(letra) == 'N')
+                break;
+        }
+        else if (ChecaVitoria(campo))
+        {
+            LimpaTela();
+            AbreBombasCampo(campo);
+            MostraCampo(campo);
+
+            printf("VOCE GANHOU, PARABENS BRO!!!!!!!!!!!!!!\n");
+
+            char letra = 0;
+
+            printf("Deseja continuar jogando? (Y/N)\n");
+            scanf("\n%c", &letra);
+
+            if (toupper(letra) == 'Y')
+                ConstroiCampo(campo);
+            else if (toupper(letra) == 'N')
+                break;
+        }
+    }
+
+    return 0;
+}
